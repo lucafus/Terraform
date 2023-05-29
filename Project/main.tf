@@ -74,20 +74,23 @@ resource "aws_instance" "project_instance" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo yum update -y",            # Update the system
-      "sudo yum install -y java-1.8*", # Install Java (required by Jenkins)
-      "sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo", # Add Jenkins repository
-      "sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key", # Import Jenkins repository key
-      "sudo yum install -y jenkins",   # Install Jenkins
-      "sudo systemctl start jenkins"   # Start Jenkins
+      "sudo yum update -y",
+      "sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo",
+      "sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key",
+      "sudo yum upgrade -y",
+      "sudo amazon-linux-extras install java-openjdk11 -y",
+      "sudo yum install jenkins -y",
+      "sudo systemctl enable jenkins",
+      "sudo systemctl start jenkins",
+      "sudo systemctl status jenkins"
     ]
   }
 
   connection {
     type        = "ssh"
-    user        = "ec2-user"                             # Specify the SSH user for the EC2 instance
-    private_key = tls_private_key.generated.private_key_pem  # Use the private key content directly
-    host        = self.public_ip                         # Use the public IP of the EC2 instance
+    user        = "ec2-user"                                # Specify the SSH user for the EC2 instance
+    private_key = tls_private_key.generated.private_key_pem # Use the private key content directly
+    host        = self.public_ip                            # Use the public IP of the EC2 instance
   }
 }
 
@@ -107,4 +110,3 @@ resource "aws_s3_bucket_acl" "jenkins" {
   bucket = aws_s3_bucket.jenkins.id
   acl    = "private"
 }
-
