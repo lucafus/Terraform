@@ -1,16 +1,3 @@
-provider "aws" {
-  region = "us-east-2"
-}
-
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-}
-
 resource "aws_security_group" "jenkins_sg" {
   name        = "jenkins_sg"
   description = "Project Security Group for IN"
@@ -61,9 +48,9 @@ resource "aws_key_pair" "generated" {
 }
 
 resource "aws_instance" "project_instance" {
-  subnet_id              = "subnet-0b3166e38e2e415e1"
-  ami                    = "ami-05842f1afbf311a43"
-  instance_type          = "t2.micro"
+  subnet_id              = var.subnet
+  ami                    = var.ami
+  instance_type          = var.instance
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
   key_name               = aws_key_pair.generated.key_name
 
@@ -110,3 +97,4 @@ resource "aws_s3_bucket_acl" "jenkins" {
   bucket = aws_s3_bucket.jenkins.id
   acl    = "private"
 }
+
